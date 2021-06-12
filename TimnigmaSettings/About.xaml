@@ -114,7 +114,7 @@
             <TextBlock Width="90" Text="Email:" />
             <TextBlock>
                 <Hyperlink
-                    NavigateUri="mailto: KennedyTim@outlook.com?subject=Windows Update Viewer Feedback"
+                    NavigateUri="mailto: KennedyTim@outlook.com?subject=Timnigma Settings Feedback"
                     RequestNavigate="OnNavigate"
                     ToolTip="Send a friendly email to Tim">
                     KennedyTim@outlook.com
