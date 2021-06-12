@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("TimnigmaSettings")]
 [assembly: AssemblyDescription("Settings app for the Timnigma Rainmeter skins")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("t_K")]
+[assembly: AssemblyCompany("T_K")]
 [assembly: AssemblyProduct("TimnigmaSettings")]
 [assembly: AssemblyCopyright("Copyright ©  2021 Tim Kennedy")]
 [assembly: AssemblyTrademark("")]
@@ -49,5 +49,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.2.0.161")]
-[assembly: AssemblyFileVersion("0.2.0.161")]
+[assembly: AssemblyVersion("0.3.0.163")]
+[assembly: AssemblyFileVersion("0.3.0.163")]
