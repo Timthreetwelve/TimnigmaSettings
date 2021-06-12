@@ -11,15 +11,15 @@ namespace TimnigmaSettings
     [Serializable]
     public class Preferences : INotifyPropertyChanged
     {
-        private string fontface;
+        private string font;
 
         [IniSerialization("Font")]
-        public string FontFace
+        public string Font
         {
-            get { return fontface; }
+            get { return font; }
             set
             {
-                fontface = value;
+                font = value;
                 OnPropertyChanged();
             }
         }
@@ -40,7 +40,7 @@ namespace TimnigmaSettings
         private string ttType;
 
         [IniSerialization("TTType")]
-        public string TooltipType
+        public string TTType
         {
             get { return ttType; }
             set
@@ -124,19 +124,6 @@ namespace TimnigmaSettings
             set
             {
                 menuHoverAlpha = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string tjMaxTemp;
-
-        [IniSerialization("TjMaxTemp")]
-        public string TjMaxTemp
-        {
-            get { return tjMaxTemp; }
-            set
-            {
-                tjMaxTemp = value;
                 OnPropertyChanged();
             }
         }
@@ -244,7 +231,6 @@ namespace TimnigmaSettings
                 OnPropertyChanged();
             }
         }
-
 
         #region Handle property change event
         public event PropertyChangedEventHandler PropertyChanged;
