@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -31,6 +32,8 @@ namespace TimnigmaSettings
             InitializeComponent();
 
             ReadSettings();
+
+            AddMissingKeys();
         }
 
         #region Settings
@@ -74,12 +77,63 @@ namespace TimnigmaSettings
         }
         #endregion Settings
 
+        #region Find any keys missing from Preferences.inc
+        private List<string> FindMissingKeys()
+        {
+            // Create list of preferences
+            Preferences pref = new Preferences();
+            List<string> prefList = new List<string>();
+            foreach (PropertyInfo p in pref.GetType().GetProperties())
+            {
+                prefList.Add(p.Name);
+            }
+
+            // Create list of keys in ini file
+            IniSection section = preferencesIni.Sections["Variables"];
+            IniKeyCollection iniKeys = section.Keys;
+            List<string> iniList = new List<string>();
+            foreach (IniKey item in iniKeys)
+            {
+                iniList.Add(item.Name);
+            }
+
+            // return items in preferences list that do not have a key in preferences.ini
+            return prefList.Except(iniList, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+        #endregion Find any keys missing from Preferences.inc
+
+        #region Add missing keys
+        private void AddMissingKeys()
+        {
+            if (FindMissingKeys().Count > 0)
+            {
+                foreach (string item in FindMissingKeys())
+                {
+                    try
+                    {
+                        _ = preferencesIni.Sections["Variables"].Keys.Add(item);
+                        log.Debug($"Added key: {item} to Preferences.inc");
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Debug($"Failed to add missing key [{item}] in Preferences.inc");
+                        _ = MessageBox.Show($"Failed to add missing key [{item}] in Preferences.inc\n{ex}",
+                        "Error",
+                                            MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    }
+                }
+                preferencesIni.Save(configFile);
+            }
+        }
+        #endregion Add missing keys
+
         #region Save Preferences.inc file
         private void SaveIni()
         {
-            preferencesIni.Sections["Variables"].Keys["Font"].Value = prefs.FontFace;
+            preferencesIni.Sections["Variables"].Keys["Font"].Value = prefs.Font;
             preferencesIni.Sections["Variables"].Keys["FontSize"].Value = prefs.FontSize;
-            preferencesIni.Sections["Variables"].Keys["TTType"].Value = prefs.TooltipType;
+            preferencesIni.Sections["Variables"].Keys["TTType"].Value = prefs.TTType;
             preferencesIni.Sections["Variables"].Keys["PowerShell"].Value = prefs.PowerShell;
             preferencesIni.Sections["Variables"].Keys["HWversion"].Value = prefs.HWVersion;
             preferencesIni.Sections["Variables"].Keys["BarTransparency"].Value = prefs.BarTransparency;
@@ -97,7 +151,7 @@ namespace TimnigmaSettings
             preferencesIni.Save(configFile);
             log.Debug("preferences saved");
         }
-        #endregion Save the Preferences.inc
+        #endregion Save Preferences.inc file
 
         #region Window events
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -117,19 +171,12 @@ namespace TimnigmaSettings
         #region Button events
         private void Font_Click(object sender, RoutedEventArgs e)
         {
-            FontSelector fs = new FontSelector(prefs.FontFace)
+            FontSelector fs = new FontSelector(prefs.Font)
             {
                 Owner = this
             };
-            fs.ShowDialog();
-            if (string.IsNullOrWhiteSpace(fs.FontName))
-            {
-                prefs.FontFace = "Segoe UI";
-            }
-            else
-            {
-                prefs.FontFace = fs.FontName;
-            }
+            _ = fs.ShowDialog();
+            prefs.Font = string.IsNullOrWhiteSpace(fs.FontName) ? "Segoe UI" : fs.FontName;
         }
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
@@ -208,6 +255,18 @@ namespace TimnigmaSettings
         }
         #endregion Mouse events
 
+        #region Hyper-link click
+        private void Hyp_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            log.Debug($"Opening {e.Uri.AbsoluteUri}");
+            if (!string.IsNullOrWhiteSpace(e.Uri.AbsoluteUri))
+            {
+                _ = Process.Start(e.Uri.AbsoluteUri);
+                e.Handled = true;
+            }
+        }
+        #endregion Hyper-link click
+
         #region Combo boxes
 
         private void CbxToolTipType_Loaded(object sender, RoutedEventArgs e)
@@ -217,7 +276,7 @@ namespace TimnigmaSettings
                 "Normal",
                 "Balloon"
             };
-            cbxToolTipType.SelectedIndex = int.Parse(prefs.TooltipType);
+            cbxToolTipType.SelectedIndex = int.Parse(prefs.TTType);
         }
 
         private void CbxToolTipType_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -226,11 +285,11 @@ namespace TimnigmaSettings
             string value = combo.SelectedItem as string;
             if (value == "Balloon")
             {
-                prefs.TooltipType = "1";
+                prefs.TTType = "1";
             }
             else
             {
-                prefs.TooltipType = "0";
+                prefs.TTType = "0";
             }
         }
 
